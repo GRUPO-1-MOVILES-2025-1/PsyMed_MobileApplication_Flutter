@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_moviles/views/patients_list_view.dart';
 
 class HomeView extends StatelessWidget {
   final String userName;
@@ -67,23 +68,23 @@ class HomeView extends StatelessWidget {
             // Logo central
             Center(
               child: Container(
-                    width: double.infinity,
-                    height: size.height * 0.25,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF10BEAE),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(40),
-                        bottomRight: Radius.circular(40),
-                      ),
-                    ),
-                    child: Center(
-                      child: Image.asset(
-                        'assets/images/logo_psymed.png',
-                        height: size.height * 0.12,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                width: double.infinity,
+                height: size.height * 0.25,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF10BEAE),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
                   ),
+                ),
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/logo_psymed.png',
+                    height: size.height * 0.12,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
             ),
 
             const SizedBox(height: 32),
@@ -100,7 +101,10 @@ class HomeView extends StatelessWidget {
                       icon: Icons.people,
                       label: 'Pacientes 🧑‍⚕️',
                       onTap: () {
-                        // TODO: Navegar a vista Pacientes
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PatientsListView()),
+                        );
                       },
                     ),
                     _buildMenuButton(
@@ -131,7 +135,6 @@ class HomeView extends StatelessWidget {
                 ),
               ),
             ),
-
           ],
         ),
       ),
@@ -139,55 +142,54 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildMenuButton(
-  BuildContext context, {
-  required IconData icon,
-  required String label,
-  required VoidCallback onTap,
-}) {
-  final match = RegExp(r'(.+?)( [\u{1F300}-\u{1FAFF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}])?$',
-          unicode: true)
-      .firstMatch(label);
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required VoidCallback onTap,
+      }) {
+    final match = RegExp(r'(.+?)( [\u{1F300}-\u{1FAFF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}])?$',
+        unicode: true)
+        .firstMatch(label);
 
-  final text = match?.group(1) ?? label;
-  final emoji = match?.group(2) ?? '';
+    final text = match?.group(1) ?? label;
+    final emoji = match?.group(2) ?? '';
 
-  return SizedBox(
-    width: double.infinity,
-    height: 60,
-    child: ElevatedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 24, color: Colors.white),
-      label: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: text,
-              style: const TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+    return SizedBox(
+      width: double.infinity,
+      height: 60,
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 24, color: Colors.white),
+        label: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: text,
+                style: const TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            TextSpan(
-              text: emoji,
-              style: const TextStyle(
-                fontSize: 18,
-                fontFamily: 'PlusJakartaSans',
-                color: Colors.black, // mantiene color original del emoji
+              TextSpan(
+                text: emoji,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'PlusJakartaSans',
+                  color: Colors.black,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF10BEAE),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF10BEAE),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    ),
-  );
-}
-
+    );
+  }
 }
