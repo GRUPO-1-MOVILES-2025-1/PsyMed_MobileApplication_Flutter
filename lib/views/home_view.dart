@@ -108,7 +108,7 @@ class HomeView extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const PatientsListView()),
+                          MaterialPageRoute(builder: (context) => PatientsListView(userName: this.userName)),
                         );
                       },
                     ),

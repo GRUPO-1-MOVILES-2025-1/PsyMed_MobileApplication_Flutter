@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_moviles/views/home_view.dart';
 import 'package:proyecto_moviles/views/login_view.dart';
 
 class SidebarWidget extends StatelessWidget {
@@ -43,7 +44,10 @@ class SidebarWidget extends StatelessWidget {
             leading: Icon(Icons.home),
             title: Text('Inicio'),
             onTap: () {
-              Navigator.pop(context); // Cierra el Drawer
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeView(userName: userName)),
+              ); 
             },
           ),
           ListTile(
