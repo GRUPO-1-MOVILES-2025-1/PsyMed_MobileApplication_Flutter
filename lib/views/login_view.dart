@@ -40,6 +40,7 @@ class _LoginViewState extends State<LoginView> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      final username = data['username'] ?? 'Usuario/a'; // Obtén el nombre de usuario
       final success = data['success'];
       final error = data['error'];
 
@@ -52,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeView()),
+          MaterialPageRoute(builder: (context) => HomeView(userName: username)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

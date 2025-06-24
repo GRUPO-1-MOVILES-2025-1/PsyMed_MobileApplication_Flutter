@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:proyecto_moviles/shared/sidebar_widget.dart';
+
 class HomeView extends StatelessWidget {
   final String userName;
 
-  const HomeView({super.key, this.userName = 'Usuario/a'});
+  HomeView({super.key, required this.userName});
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +13,7 @@ class HomeView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      drawer: SidebarWidget(userName: this.userName),
       body: SafeArea(
         child: Column(
           children: [
@@ -21,12 +24,14 @@ class HomeView extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white),
-                    onPressed: () {
-                      // TODO: abrir menú lateral
-                    },
-                    tooltip: 'Menú',
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(Icons.menu, color: Colors.white),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      tooltip: 'Menú',
+                    ),
                   ),
                   Expanded(
                     child: Center(
@@ -137,6 +142,9 @@ class HomeView extends StatelessWidget {
       ),
     );
   }
+
+  
+
 
   Widget _buildMenuButton(
   BuildContext context, {
