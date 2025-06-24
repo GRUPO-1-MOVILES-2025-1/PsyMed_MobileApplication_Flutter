@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-
+import 'package:proyecto_moviles/services/auth_service.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -14,49 +15,80 @@ class _RegisterViewState extends State<RegisterView> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
   final _apellidoController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _telefonoController = TextEditingController();
   final _ubicacionController = TextEditingController();
+  final _passwordController = TextEditingController();
   DateTime? _fechaNacimiento;
   String? _genero;
-
+  String? _numeroCompleto;
   bool _loading = false;
+  bool _verPassword = false;
 
   @override
   void dispose() {
     _nombreController.dispose();
     _apellidoController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
-    _telefonoController.dispose();
     _ubicacionController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   void _seleccionarFechaNacimiento() async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: DateTime(2000),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setState(() {
-        _fechaNacimiento = picked;
-      });
+      setState(() => _fechaNacimiento = picked);
     }
   }
 
-  void _crearCuenta() {
-    if (_formKey.currentState!.validate()) {
+  void _crearCuenta() async {
+    if (_formKey.currentState!.validate() &&
+        _fechaNacimiento != null &&
+        _genero != null &&
+        _numeroCompleto != null) {
       setState(() => _loading = true);
 
-      // Simular envío
-      Future.delayed(Duration(seconds: 2), () {
-        setState(() => _loading = false);
+      final response = await AuthService.register(
+        username: _usernameController.text.trim(),
+        name: _nombreController.text.trim(),
+        lastName: _apellidoController.text.trim(),
+        birthDate: _fechaNacimiento!,
+        email: _emailController.text.trim(),
+        gender: _genero!,
+        phone: _numeroCompleto!,
+        ubication: _ubicacionController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      setState(() => _loading = false);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final success = data['success'];
+        final error = data['error'];
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Cuenta registrada con éxito")),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error: $error")),
+          );
+        }
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Cuenta registrada con éxito")),
+          SnackBar(content: Text("Error de red: ${response.statusCode}")),
         );
-      });
+      }
     }
   }
 
@@ -72,7 +104,6 @@ class _RegisterViewState extends State<RegisterView> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                // Header decorativo
                 Container(
                   width: double.infinity,
                   height: size.height * 0.2,
@@ -92,7 +123,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                 ),
                 SizedBox(height: 24),
-
                 Text(
                   "Crear Cuenta",
                   style: GoogleFonts.plusJakartaSans(
@@ -107,7 +137,6 @@ class _RegisterViewState extends State<RegisterView> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Nombre y Apellido
                       Row(
                         children: [
                           Expanded(
@@ -119,7 +148,6 @@ class _RegisterViewState extends State<RegisterView> {
                               ),
                               validator: (value) =>
                                   value!.isEmpty ? "Campo obligatorio" : null,
-                              textCapitalization: TextCapitalization.words,
                             ),
                           ),
                           SizedBox(width: 12),
@@ -132,14 +160,21 @@ class _RegisterViewState extends State<RegisterView> {
                               ),
                               validator: (value) =>
                                   value!.isEmpty ? "Campo obligatorio" : null,
-                              textCapitalization: TextCapitalization.words,
                             ),
                           ),
                         ],
                       ),
                       SizedBox(height: 16),
-
-                      // Fecha de nacimiento
+                      TextFormField(
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          labelText: "Nombre de usuario",
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) =>
+                            value!.isEmpty ? "Campo obligatorio" : null,
+                      ),
+                      SizedBox(height: 16),
                       InkWell(
                         onTap: _seleccionarFechaNacimiento,
                         child: InputDecorator(
@@ -155,8 +190,6 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                       ),
                       SizedBox(height: 16),
-
-                      // Correo
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -166,18 +199,19 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                         validator: (value) {
                           if (value!.isEmpty) return "Campo obligatorio";
-                          if (!RegExp(r"^[\w\.-]+@[\w\.-]+\.\w+$")
-                              .hasMatch(value)) {
+                          if (!RegExp(r"^[\w\.-]+@[\w\.-]+\.\w+$").hasMatch(value)) {
                             return "Correo inválido";
                           }
                           return null;
                         },
                       ),
                       SizedBox(height: 16),
-
-                      // Género
                       DropdownButtonFormField<String>(
                         value: _genero,
+                        decoration: InputDecoration(
+                          labelText: "Género",
+                          border: OutlineInputBorder(),
+                        ),
                         items: ["Masculino", "Femenino", "Otro"]
                             .map((gen) => DropdownMenuItem(
                                   child: Text(gen),
@@ -185,30 +219,18 @@ class _RegisterViewState extends State<RegisterView> {
                                 ))
                             .toList(),
                         onChanged: (val) => setState(() => _genero = val),
-                        decoration: InputDecoration(
-                          labelText: "Género",
-                          border: OutlineInputBorder(),
-                        ),
                         validator: (value) =>
                             value == null ? "Selecciona un género" : null,
                       ),
                       SizedBox(height: 16),
-
-                      // Teléfono
                       IntlPhoneField(
                         decoration: InputDecoration(
                           labelText: 'Teléfono',
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(),
-                          ),
+                          border: OutlineInputBorder(),
                         ),
-                        initialCountryCode: 'PE', // Perú
+                        initialCountryCode: 'PE',
                         onChanged: (phone) {
-                          print('Número completo: ${phone.completeNumber}');
-                          // Puedes guardarlo en una variable si lo necesitas
-                        },
-                        onSaved: (phone) {
-                          // Guardar el número completo si usas un form
+                          _numeroCompleto = phone.completeNumber;
                         },
                         validator: (value) {
                           if (value == null || value.number.length < 6) {
@@ -217,10 +239,7 @@ class _RegisterViewState extends State<RegisterView> {
                           return null;
                         },
                       ),
-
                       SizedBox(height: 16),
-
-                      // Ubicación
                       TextFormField(
                         controller: _ubicacionController,
                         decoration: InputDecoration(
@@ -230,9 +249,28 @@ class _RegisterViewState extends State<RegisterView> {
                         validator: (value) =>
                             value!.isEmpty ? "Campo obligatorio" : null,
                       ),
+                      SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: !_verPassword,
+                        decoration: InputDecoration(
+                          labelText: "Contraseña",
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(_verPassword ? Icons.visibility : Icons.visibility_off),
+                            onPressed: () => setState(() => _verPassword = !_verPassword),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Campo obligatorio";
+                          } else if (value.length < 6) {
+                            return "Mínimo 6 caracteres";
+                          }
+                          return null;
+                        },
+                      ),
                       SizedBox(height: 24),
-
-                      // Botón crear cuenta
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -245,8 +283,7 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                           ),
                           child: _loading
-                              ? CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2)
+                              ? CircularProgressIndicator(color: Colors.white)
                               : Text(
                                   "Crear cuenta",
                                   style: GoogleFonts.plusJakartaSans(
@@ -257,12 +294,8 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                       ),
                       SizedBox(height: 16),
-
-                      // Enlace de retorno
                       TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // o ir a LoginView
-                        },
+                        onPressed: () => Navigator.pop(context),
                         child: Text(
                           "¿Ya tienes una cuenta? Inicia sesión",
                           style: TextStyle(
@@ -271,7 +304,6 @@ class _RegisterViewState extends State<RegisterView> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 24),
                     ],
                   ),
                 ),
