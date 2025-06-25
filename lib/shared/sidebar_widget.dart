@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
-import 'package:proyecto_moviles/views/login_view.dart';
+import 'package:proyecto_moviles/views/iam/login_view.dart';
 
 class SidebarWidget extends StatelessWidget {
   final String userName;

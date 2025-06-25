@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_moviles/views/patients_list_view.dart';
+import 'package:proyecto_moviles/views/Tasks/patients_list_view.dart';
 
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
 
