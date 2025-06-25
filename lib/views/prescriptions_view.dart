@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/edit_medication_view.dart';
-import '../services/ task_service.dart';
+import '../services/task_service.dart';
 import '../models/task_model.dart';
 
 class PrescriptionsView extends StatefulWidget {
@@ -41,7 +41,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
 
       // Imprimir cada tarea para debug
       for (var task in allTasks) {
-        print(' Tarea: ${task.title} - Estado: ${task.status} - ID: ${task.id}');
+        print(' Tarea: ${task.title} - Estado: ${task.status} - ID: ${task.idPatient}');
       }
 
       setState(() {
@@ -308,7 +308,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                                   ),
                                 ),
                                 Text(
-                                  'ID: ${task.id}', // Debug
+                                  'ID: ${task.idPatient}', // Debug
                                   style: TextStyle(
                                     color: Colors.grey[500],
                                     fontSize: 12,
@@ -563,7 +563,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _deleteTask(task.id);
+                _deleteTask(task.idPatient);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Eliminar'),
