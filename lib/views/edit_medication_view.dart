@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import '../models/task_model.dart';
+import '../services/ task_service.dart';
 
 class EditMedicationView extends StatefulWidget {
-  final Map<String, String> medication;
+  final Task? task;
   final bool isEditing;
+  final VoidCallback? onTaskUpdated;
 
   const EditMedicationView({
     super.key,
-    required this.medication,
+    this.task,
     this.isEditing = true,
+    this.onTaskUpdated,
   });
 
   @override
@@ -15,30 +19,137 @@ class EditMedicationView extends StatefulWidget {
 }
 
 class _EditMedicationViewState extends State<EditMedicationView> {
-  late TextEditingController _nameController;
-  late TextEditingController _dosageController;
-  late TextEditingController _quantityController;
-  late TextEditingController _startDateController;
-  late TextEditingController _endDateController;
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _patientIdController;
+  int _selectedStatus = 0;
+  bool _isLoading = false;
+
+  final List<String> _statusOptions = [
+    'Pendiente',
+    'En Progreso',
+    'Completada',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.medication['name']);
-    _dosageController = TextEditingController(text: widget.medication['dosage']);
-    _quantityController = TextEditingController(text: widget.medication['quantity']);
-    _startDateController = TextEditingController(text: widget.medication['startDate']);
-    _endDateController = TextEditingController(text: widget.medication['endDate']);
+    _titleController = TextEditingController(text: widget.task?.title ?? '');
+    _descriptionController = TextEditingController(text: widget.task?.description ?? '');
+    _patientIdController = TextEditingController(text: widget.task?.idPatient.toString() ?? '1');
+    _selectedStatus = widget.task?.status ?? 0;
+
+    print('🎬 EditMedicationView iniciado. Modo: ${widget.isEditing ? "Editar" : "Crear"}'); // Debug
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _dosageController.dispose();
-    _quantityController.dispose();
-    _startDateController.dispose();
-    _endDateController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _patientIdController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveTask() async {
+    print(' Intentando guardar tarea...'); // Debug
+
+    if (_titleController.text.trim().isEmpty ||
+        _descriptionController.text.trim().isEmpty ||
+        _patientIdController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor completa todos los campos'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final patientId = int.tryParse(_patientIdController.text.trim());
+    if (patientId == null || patientId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ID del paciente debe ser un número válido'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      if (widget.isEditing && widget.task != null) {
+        print(' Actualizando tarea existente: ${widget.task!.id}'); // Debug
+
+        final updateRequest = UpdateTaskRequest(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          status: _selectedStatus,
+        );
+
+        final updatedTask = await TaskService.updateTask(widget.task!.id, updateRequest);
+        print('Tarea actualizada: ${updatedTask.id}'); // Debug
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tarea actualizada exitosamente'),
+              backgroundColor: Color(0xFF10BEAE),
+            ),
+          );
+        }
+      } else {
+        print(' Creando nueva tarea...'); // Debug
+
+        final createRequest = CreateTaskRequest(
+          idPatient: patientId,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          status: _selectedStatus,
+        );
+
+        final createdTask = await TaskService.createTask(createRequest);
+        print(' Tarea creada: ${createdTask.id}'); // Debug
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tarea creada exitosamente'),
+              backgroundColor: Color(0xFF10BEAE),
+            ),
+          );
+        }
+      }
+
+
+      print(' Llamando callback onTaskUpdated...'); // Debug
+      if (widget.onTaskUpdated != null) {
+        widget.onTaskUpdated!();
+      }
+
+
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      if (mounted) {
+        print(' Cerrando pantalla con resultado true');
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      print(' Error al guardar tarea: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -50,22 +161,19 @@ class _EditMedicationViewState extends State<EditMedicationView> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            print(' Cerrando sin guardar'); // Debug
+            Navigator.pop(context);
+          },
         ),
         title: Text(
-          widget.isEditing ? 'Edit Medication' : 'Add New Medication',
+          widget.isEditing ? 'Editar Tarea' : 'Nueva Tarea',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -78,39 +186,23 @@ class _EditMedicationViewState extends State<EditMedicationView> {
             ),
             child: Column(
               children: [
-                if (widget.isEditing) ...[
-                  Text(
-                    'Current Medication: ${widget.medication['name']}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                if (widget.isEditing && widget.task != null) ...[
+                  const Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                    size: 48,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
-                    'Dosage/Frequency: ${widget.medication['dosage']}',
+                    'Editando: ${widget.task!.title}',
                     style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'Quantity: ${widget.medication['quantity']}',
-                    style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
                   Text(
-                    'Start Date: ${widget.medication['startDate']}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'End Date: ${widget.medication['endDate']}',
+                    'Estado actual: ${widget.task!.statusText}',
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.white,
@@ -124,7 +216,7 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Add New Medication',
+                    'Crear Nueva Tarea',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -132,7 +224,7 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                     ),
                   ),
                   const Text(
-                    'Fill in the details below',
+                    'Completa los detalles a continuación',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.white,
@@ -150,8 +242,41 @@ class _EditMedicationViewState extends State<EditMedicationView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (!widget.isEditing) ...[
+                    const Text(
+                      'ID del Paciente',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _patientIdController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Ingresa el ID del paciente',
+                        hintStyle: TextStyle(color: Colors.grey[400]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xFF10BEAE)),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
                   const Text(
-                    'Medication Name',
+                    'Título de la Tarea',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -159,9 +284,9 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
-                    controller: _nameController,
+                    controller: _titleController,
                     decoration: InputDecoration(
-                      hintText: 'Enter medication name',
+                      hintText: 'Ingresa el título de la tarea',
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -181,7 +306,7 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                   const SizedBox(height: 24),
 
                   const Text(
-                    'Dosage/Frequency',
+                    'Descripción',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -189,9 +314,10 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
-                    controller: _dosageController,
+                    controller: _descriptionController,
+                    maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Enter dosage and frequency',
+                      hintText: 'Ingresa la descripción de la tarea',
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -211,18 +337,16 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                   const SizedBox(height: 24),
 
                   const Text(
-                    'Quantity',
+                    'Estado',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _quantityController,
+                  DropdownButtonFormField<int>(
+                    value: _selectedStatus,
                     decoration: InputDecoration(
-                      hintText: 'Enter quantity',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -237,91 +361,16 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                       ),
                       contentPadding: const EdgeInsets.all(16),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'Start Date',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _startDateController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter start date',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF10BEAE)),
-                      ),
-                      contentPadding: const EdgeInsets.all(16),
-                    ),
-                    readOnly: true,
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
+                    items: _statusOptions.asMap().entries.map((entry) {
+                      return DropdownMenuItem<int>(
+                        value: entry.key,
+                        child: Text(entry.value),
                       );
-                      if (date != null) {
-                        _startDateController.text =
-                        '${date.month}/${date.day}/${date.year}';
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'End Date',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _endDateController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter end date',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF10BEAE)),
-                      ),
-                      contentPadding: const EdgeInsets.all(16),
-                    ),
-                    readOnly: true,
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                      );
-                      if (date != null) {
-                        _endDateController.text =
-                        '${date.month}/${date.day}/${date.year}';
-                      }
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedStatus = value ?? 0;
+                      });
                     },
                   ),
                 ],
@@ -335,32 +384,9 @@ class _EditMedicationViewState extends State<EditMedicationView> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Validate that required fields are filled
-                  if (_nameController.text.trim().isEmpty ||
-                      _dosageController.text.trim().isEmpty ||
-                      _quantityController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please fill in all required fields'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-
-
-                  final successMessage = widget.isEditing
-                      ? 'Medication updated successfully'
-                      : 'New medication added successfully';
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(successMessage),
-                      backgroundColor: const Color(0xFF10BEAE),
-                    ),
-                  );
-                  Navigator.pop(context);
+                onPressed: _isLoading ? null : () {
+                  print('💾 Botón guardar presionado'); // Debug
+                  _saveTask();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10BEAE),
@@ -369,8 +395,10 @@ class _EditMedicationViewState extends State<EditMedicationView> {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
-                child: Text(
-                  widget.isEditing ? 'Save Changes' : 'Add Medication',
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                  widget.isEditing ? 'Guardar Cambios' : 'Crear Tarea',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
