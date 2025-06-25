@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/edit_medication_view.dart';
-import '../services/task_service.dart';
+import '../services/ task_service.dart';
 import '../models/task_model.dart';
 
 class PrescriptionsView extends StatefulWidget {
@@ -29,7 +29,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
   }
 
   Future<void> _loadTasks() async {
-    print(' Cargando tareas...'); // Debug
+    print('Cargando medicamentos...');
     try {
       setState(() {
         isLoading = true;
@@ -37,21 +37,16 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
       });
 
       final allTasks = await TaskService.getAllTasks();
-      print('📋 Tareas obtenidas: ${allTasks.length}'); // Debug
-
-      // Imprimir cada tarea para debug
-      for (var task in allTasks) {
-        print(' Tarea: ${task.title} - Estado: ${task.status} - ID: ${task.idPatient}');
-      }
+      print('Medicamentos obtenidos: ${allTasks.length}');
 
       setState(() {
         tasks = allTasks;
         isLoading = false;
       });
 
-      print(' Estado actualizado. Total tareas en UI: ${tasks.length}'); // Debug
+      print('Estado actualizado. Total medicamentos en UI: ${tasks.length}');
     } catch (e) {
-      print(' Error al cargar tareas: $e'); // Debug
+      print(' Error al cargar medicamentos: $e');
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
@@ -65,15 +60,15 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tarea eliminada exitosamente'),
+            content: Text('Medication deleted successfully'),
             backgroundColor: Color(0xFF10BEAE),
           ),
         );
-        await _loadTasks(); // Esperar a que termine la recarga
+        await _loadTasks();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Error: Tarea no encontrada'),
+            content: Text('Error: Medication not found'),
             backgroundColor: Colors.red,
           ),
         );
@@ -81,10 +76,52 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al eliminar: $e'),
+          content: Text('Error deleting: $e'),
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Map<String, String> _parseDescription(String description) {
+    Map<String, String> parsed = {
+      'dosage': '',
+      'quantity': '',
+      'startDate': '',
+      'endDate': '',
+    };
+
+    if (description.contains('|')) {
+      List<String> parts = description.split('|');
+      for (String part in parts) {
+        part = part.trim();
+        if (part.startsWith('Dosage:')) {
+          parsed['dosage'] = part.substring(7).trim();
+        } else if (part.startsWith('Quantity:')) {
+          parsed['quantity'] = part.substring(9).trim();
+        } else if (part.startsWith('Start:')) {
+          parsed['startDate'] = part.substring(6).trim();
+        } else if (part.startsWith('End:')) {
+          parsed['endDate'] = part.substring(4).trim();
+        }
+      }
+    } else {
+      parsed['dosage'] = description;
+    }
+
+    return parsed;
+  }
+
+  String _getStatusText(int status) {
+    switch (status) {
+      case 0:
+        return 'Active';
+      case 1:
+        return 'Paused';
+      case 2:
+        return 'Completed';
+      default:
+        return 'Unknown';
     }
   }
 
@@ -100,7 +137,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'PSYMED - Tareas',
+          'PSYMED - Medications',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -111,7 +148,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
-              print(' Botón refresh presionado'); // Debug
+              print(' Botón refresh presionado');
               _loadTasks();
             },
           ),
@@ -119,7 +156,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
       ),
       body: Column(
         children: [
- 
+          // Patient Info Section
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -128,10 +165,11 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.grey[300],
+                  child: const Icon(Icons.person, size: 50, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Tareas del Paciente',
+                  'Patient Medications',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -151,27 +189,11 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                     color: Colors.grey,
                   ),
                 ),
- 
-                Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'Debug: ${tasks.length} tareas cargadas',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue[700],
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
 
-
+          // Medications Section
           Expanded(
             child: Container(
               width: double.infinity,
@@ -181,9 +203,9 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(color: Color(0xFF10BEAE)),
                     SizedBox(height: 16),
-                    Text('Cargando tareas...'),
+                    Text('Loading medications...'),
                   ],
                 ),
               )
@@ -195,7 +217,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                     Icon(Icons.error, size: 64, color: Colors.red[300]),
                     const SizedBox(height: 16),
                     Text(
-                      'Error al cargar tareas',
+                      'Error loading medications',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -211,7 +233,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _loadTasks,
-                      child: const Text('Reintentar'),
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
@@ -221,10 +243,10 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.task_alt, size: 64, color: Colors.grey),
+                    const Icon(Icons.medication, size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
                     const Text(
-                      'No hay tareas disponibles',
+                      'No medications available',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -233,19 +255,11 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Presiona "Nueva Tarea" para crear una',
+                      'Press "Add Medication" to create one',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        print(' Botón recargar desde empty state'); // Debug
-                        _loadTasks();
-                      },
-                      child: const Text('Recargar'),
                     ),
                   ],
                 ),
@@ -257,101 +271,126 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                   itemCount: tasks.length,
                   itemBuilder: (context, index) {
                     final task = tasks[index];
+                    final parsedDescription = _parseDescription(task.description);
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(8),
+                        color: const Color(0xFF10BEAE),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(task.status),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(
-                              _getStatusIcon(task.status),
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Tarea: ${task.title}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Descripción: ${task.description}',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                Text(
-                                  'Estado: ${task.statusText}',
-                                  style: TextStyle(
-                                    color: _getStatusColor(task.status),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  'ID: ${task.idPatient}', // Debug
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  'Creada: ${task.startDate}',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _editTask(task);
-                              } else if (value == 'delete') {
-                                _showDeleteConfirmation(task);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'edit',
-                                child: Row(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Icons.edit, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('Editar'),
+                                    Text(
+                                      'Medication Name: ${task.title}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    if (parsedDescription['dosage']!.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Dosage/Frequency: ${parsedDescription['dosage']}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                    if (parsedDescription['quantity']!.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Quantity: ${parsedDescription['quantity']}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                    if (parsedDescription['startDate']!.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Start Date: ${parsedDescription['startDate']}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                    if (parsedDescription['endDate']!.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'End Date: ${parsedDescription['endDate']}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        'Status: ${_getStatusText(task.status)}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              const PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.delete, size: 20, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text('Eliminar', style: TextStyle(color: Colors.red)),
-                                  ],
-                                ),
+                              PopupMenuButton<String>(
+                                icon: const Icon(Icons.more_vert, color: Colors.white),
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    _editTask(task);
+                                  } else if (value == 'delete') {
+                                    _showDeleteConfirmation(task);
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.edit, size: 20),
+                                        SizedBox(width: 8),
+                                        Text('Edit'),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete, size: 20, color: Colors.red),
+                                        SizedBox(width: 8),
+                                        Text('Delete', style: TextStyle(color: Colors.red)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -364,7 +403,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
             ),
           ),
 
-       
+          // Action Buttons
           Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -374,7 +413,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          _showEditTaskDialog(context);
+                          _showEditMedicationDialog(context);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF10BEAE),
@@ -384,7 +423,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                           ),
                         ),
                         child: const Text(
-                          'Editar Tarea',
+                          'Edit Medication',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -397,8 +436,8 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          print(' Botón Nueva Tarea presionado'); // Debug
-                          _addNewTask();
+                          print('Botón Add Medication presionado');
+                          _addNewMedication();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -408,7 +447,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                           ),
                         ),
                         child: const Text(
-                          'Nueva Tarea',
+                          'Add Medication',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -427,37 +466,11 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
     );
   }
 
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 0:
-        return Colors.orange;
-      case 1:
-        return Colors.blue;
-      case 2:
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(int status) {
-    switch (status) {
-      case 0:
-        return Icons.pending;
-      case 1:
-        return Icons.play_arrow;
-      case 2:
-        return Icons.check_circle;
-      default:
-        return Icons.help;
-    }
-  }
-
-  void _showEditTaskDialog(BuildContext context) {
+  void _showEditMedicationDialog(BuildContext context) {
     if (tasks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No hay tareas para editar'),
+          content: Text('No medications to edit'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -468,7 +481,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Seleccionar Tarea para Editar'),
+          title: const Text('Select Medication to Edit'),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
@@ -478,12 +491,9 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
               itemBuilder: (context, index) {
                 final task = tasks[index];
                 return ListTile(
-                  leading: Icon(
-                    _getStatusIcon(task.status),
-                    color: _getStatusColor(task.status),
-                  ),
+                  leading: const Icon(Icons.medication, color: Color(0xFF10BEAE)),
                   title: Text(task.title),
-                  subtitle: Text(task.statusText),
+                  subtitle: Text(_getStatusText(task.status)),
                   onTap: () {
                     Navigator.pop(context);
                     _editTask(task);
@@ -495,7 +505,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -504,7 +514,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
   }
 
   void _editTask(Task task) async {
-    print(' Editando tarea: ${task.title}'); // Debug
+    print('Editando medicamento: ${task.title}');
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -512,21 +522,21 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
           task: task,
           isEditing: true,
           onTaskUpdated: () {
-            print(' Callback onTaskUpdated llamado desde edit'); // Debug
+            print('Callback onTaskUpdated llamado desde edit');
             _loadTasks();
           },
         ),
       ),
     );
 
-    print(' Resultado de edición: $result'); // Debug
+    print(' Resultado de edición: $result');
     if (result == true) {
       await _loadTasks();
     }
   }
 
-  void _addNewTask() async {
-    print(' Navegando a crear nueva tarea'); // Debug
+  void _addNewMedication() async {
+    print(' Navegando a crear nuevo medicamento');
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -534,16 +544,16 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
           task: null,
           isEditing: false,
           onTaskUpdated: () {
-            print(' Callback onTaskUpdated llamado desde create'); // Debug
+            print('Callback onTaskUpdated llamado desde create');
             _loadTasks();
           },
         ),
       ),
     );
 
-    print(' Resultado de creación: $result'); // Debug
+    print('Resultado de creación: $result');
     if (result == true) {
-      print('Recargando lista después de crear tarea'); // Debug
+      print('Recargando lista después de crear medicamento');
       await _loadTasks();
     }
   }
@@ -553,12 +563,12 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirmar Eliminación'),
-          content: Text('¿Estás seguro de que quieres eliminar la tarea "${task.title}"?'),
+          title: const Text('Confirm Deletion'),
+          content: Text('Are you sure you want to delete the medication "${task.title}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -566,7 +576,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
                 _deleteTask(task.id);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Eliminar'),
+              child: const Text('Delete'),
             ),
           ],
         );
