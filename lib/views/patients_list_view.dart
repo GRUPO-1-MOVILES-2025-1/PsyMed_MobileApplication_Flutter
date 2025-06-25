@@ -4,8 +4,15 @@ import 'package:proyecto_moviles/shared/sidebar_widget.dart';
 
 class PatientsListView extends StatelessWidget {
   final String userName;
+  final String userId;
+  final String token;
 
-  PatientsListView({super.key, required this.userName});
+  PatientsListView({
+    super.key,
+    required this.userName,
+    required this.userId,
+    required this.token,
+  });
   
 
   @override
@@ -64,7 +71,11 @@ class PatientsListView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      drawer: SidebarWidget(userName: this.userName),
+      drawer: SidebarWidget(
+        userName: userName,
+        userId: userId,
+        token: token,
+      ),
       appBar: AppBar(
         backgroundColor: const Color(0xFF10BEAE),
         elevation: 0,

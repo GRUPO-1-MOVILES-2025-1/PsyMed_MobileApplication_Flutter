@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/register_view.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
 import 'package:proyecto_moviles/services/auth_service.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 
 
@@ -45,15 +46,22 @@ class _LoginViewState extends State<LoginView> {
       final error = data['error'];
 
       if (success == true) {
-        // Puedes guardar el token si lo devuelve
-        // final token = data['token'];
+        final token = data['token'];
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        String userId = decodedToken["nameid"] ?? "";
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Sesión iniciada")),
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeView(userName: username)),
+          MaterialPageRoute(
+            builder: (context) => HomeView(
+              userName: username,
+              token: token,
+              userId: userId,
+            ),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
