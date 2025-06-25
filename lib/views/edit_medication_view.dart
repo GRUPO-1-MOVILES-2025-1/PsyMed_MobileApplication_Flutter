@@ -54,12 +54,12 @@ class _EditMedicationViewState extends State<EditMedicationView> {
       _endDateController = TextEditingController();
     }
 
-    print('🎬 EditMedicationView iniciado. Modo: ${widget.isEditing ? "Editar" : "Crear"}');
+    print(' EditMedicationView iniciado. Modo: ${widget.isEditing ? "Editar" : "Crear"}');
   }
 
   void _parseExistingDescription() {
-    // Intentar extraer información de la descripción existente
-    // Formato esperado: "Dosage: [dosage] | Quantity: [quantity] | Start: [start] | End: [end]"
+    // Intentar extraer información de la descripción existente para hacer el match al mock wa
+    // Formato: "Dosage: [dosage] | Quantity: [quantity] | Start: [start] | End: [end]": si funcionó :)
     String description = widget.task?.description ?? '';
     String medicationName = widget.task?.title ?? '';
 
