@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/patients_list_view.dart';
+import 'package:proyecto_moviles/views/calendar_view.dart';
 
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
 
@@ -117,7 +118,10 @@ class HomeView extends StatelessWidget {
                       icon: Icons.calendar_today,
                       label: 'Agenda 📅',
                       onTap: () {
-                        // TODO: Navegar a vista Agenda
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => CalendarView(userName: this.userName)),
+                        );
                       },
                     ),
                     _buildMenuButton(

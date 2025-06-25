@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CalendarView extends StatelessWidget {
-  const CalendarView({super.key});
+  final String userName;
+
+  CalendarView({super.key, required this.userName});
+  
 
   @override
   Widget build(BuildContext context) {
