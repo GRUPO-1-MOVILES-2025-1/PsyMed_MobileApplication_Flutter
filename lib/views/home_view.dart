@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/Tasks/patients_list_view.dart';
-import 'package:proyecto_moviles/views/calendar_view.dart';
+import 'package:proyecto_moviles/views/Calendar/calendar_view.dart';
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
 
 class HomeView extends StatelessWidget {
