@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/patients_list_view.dart';
+import 'package:proyecto_moviles/views/profile_view.dart';
+import 'package:proyecto_moviles/views/settings_view.dart';
 
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
 
 class HomeView extends StatelessWidget {
   final String userName;
+  final String userId;
+  final String token;
 
-  HomeView({super.key, required this.userName});
+  HomeView({
+    super.key,
+    required this.userName,
+    required this.userId,
+    required this.token,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +23,11 @@ class HomeView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      drawer: SidebarWidget(userName: this.userName),
+      drawer: SidebarWidget(
+        userName: userName,
+        userId: userId,
+        token: token,
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -60,7 +73,16 @@ class HomeView extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.account_circle, color: Colors.white),
                     onPressed: () {
-                      // TODO: ir a perfil
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileView(
+                            userName: userName,
+                            userId: userId,
+                            token: token,
+                          ),
+                        ),
+                      );
                     },
                     tooltip: 'Perfil',
                   ),
@@ -108,7 +130,13 @@ class HomeView extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => PatientsListView(userName: this.userName)),
+                          MaterialPageRoute(
+                            builder: (context) => PatientsListView(
+                              userName: userName,
+                              userId: userId,
+                              token: token,
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -125,7 +153,16 @@ class HomeView extends StatelessWidget {
                       icon: Icons.person,
                       label: 'Perfil 👤',
                       onTap: () {
-                        // TODO: Navegar a vista Perfil
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProfileView(
+                              userName: userName,
+                              userId: userId,
+                              token: token,
+                            ),
+                          ),
+                        );
                       },
                     ),
                     _buildMenuButton(
@@ -133,7 +170,16 @@ class HomeView extends StatelessWidget {
                       icon: Icons.settings,
                       label: 'Ajustes ⚙️',
                       onTap: () {
-                        // TODO: Navegar a vista Ajustes
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SettingsView(
+                              userName: userName,
+                              userId: userId,
+                              token: token,
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -145,9 +191,6 @@ class HomeView extends StatelessWidget {
       ),
     );
   }
-
-  
-
 
   Widget _buildMenuButton(
       BuildContext context, {
