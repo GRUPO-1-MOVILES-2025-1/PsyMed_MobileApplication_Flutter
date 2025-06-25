@@ -5,7 +5,7 @@ import 'package:proyecto_moviles/shared/sidebar_widget.dart';
 class HomeView extends StatelessWidget {
   final String userName;
 
-  HomeView({super.key, required this.userName});
+  const HomeView({super.key, required this.userName});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class HomeView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      drawer: SidebarWidget(userName: this.userName),
+      drawer: SidebarWidget(userName: userName),
       body: SafeArea(
         child: Column(
           children: [

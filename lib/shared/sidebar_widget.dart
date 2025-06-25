@@ -3,7 +3,7 @@ import 'package:proyecto_moviles/views/login_view.dart';
 
 class SidebarWidget extends StatelessWidget {
   final String userName;
-  SidebarWidget({super.key, required this.userName});
+  const SidebarWidget({super.key, required this.userName});
 
   @override
   Widget build(BuildContext context) {

@@ -214,8 +214,8 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                         items: ["Masculino", "Femenino", "Otro"]
                             .map((gen) => DropdownMenuItem(
-                                  child: Text(gen),
                                   value: gen,
+                                  child: Text(gen),
                                 ))
                             .toList(),
                         onChanged: (val) => setState(() => _genero = val),
