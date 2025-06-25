@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_moviles/views/registerView.dart';
+import 'package:proyecto_moviles/views/register_view.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
+import 'package:proyecto_moviles/services/auth_service.dart';
+import 'dart:convert';
 
 
 
@@ -25,21 +27,47 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  void _iniciarSesion() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _loading = true);
+  void _iniciarSesion() async {
+  if (_formKey.currentState!.validate()) {
+    setState(() => _loading = true);
 
-      // Simulación de espera de login
-      Future.delayed(Duration(seconds: 2), () {
-        setState(() => _loading = false);
-        // Aquí iría la navegación o respuesta de login
+    final response = await AuthService.login(
+      username: _usuarioController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
+
+    setState(() => _loading = false);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final username = data['username'] ?? 'Usuario/a'; // Obtén el nombre de usuario
+      final success = data['success'];
+      final error = data['error'];
+
+      if (success == true) {
+        // Puedes guardar el token si lo devuelve
+        // final token = data['token'];
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Sesión iniciada")),
+        );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeView()),
+          MaterialPageRoute(builder: (context) => HomeView(userName: username)),
         );
-      });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $error")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error de red: ${response.statusCode}")),
+      );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
