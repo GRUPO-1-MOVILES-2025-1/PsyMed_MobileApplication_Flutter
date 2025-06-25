@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
-import '../services/ task_service.dart';
+import '../services/task_service.dart';
+
 
 class EditMedicationView extends StatefulWidget {
   final Task? task;
@@ -80,16 +81,19 @@ class _EditMedicationViewState extends State<EditMedicationView> {
 
     try {
       if (widget.isEditing && widget.task != null) {
-        print(' Actualizando tarea existente: ${widget.task!.id}'); // Debug
+        print(' Actualizando tarea existente: ${widget.task!.idPatient}'); // Debug
 
         final updateRequest = UpdateTaskRequest(
+
+          
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           status: _selectedStatus,
+          
         );
 
         final updatedTask = await TaskService.updateTask(widget.task!.id, updateRequest);
-        print('Tarea actualizada: ${updatedTask.id}'); // Debug
+        print('Tarea actualizada: ${updatedTask.idPatient}'); // Debug
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -107,10 +111,11 @@ class _EditMedicationViewState extends State<EditMedicationView> {
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           status: _selectedStatus,
+          
         );
 
         final createdTask = await TaskService.createTask(createRequest);
-        print(' Tarea creada: ${createdTask.id}'); // Debug
+        print(' Tarea creada: ${createdTask.idPatient}'); // Debug
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
