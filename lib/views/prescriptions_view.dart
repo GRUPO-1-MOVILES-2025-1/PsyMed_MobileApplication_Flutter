@@ -563,7 +563,7 @@ class _PrescriptionsViewState extends State<PrescriptionsView> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _deleteTask(task.idPatient);
+                _deleteTask(task.id);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Eliminar'),

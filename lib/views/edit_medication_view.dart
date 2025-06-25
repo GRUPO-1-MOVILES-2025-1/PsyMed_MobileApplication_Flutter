@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../services/task_service.dart';
-import '../request/create_task_request.dart';
-import '../request/update_task_request.dart';
+
 
 class EditMedicationView extends StatefulWidget {
   final Task? task;
@@ -86,14 +85,14 @@ class _EditMedicationViewState extends State<EditMedicationView> {
 
         final updateRequest = UpdateTaskRequest(
 
-          idPatient: patientId,
+          
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           status: _selectedStatus,
-          startDate: DateTime.now().toIso8601String(),
+          
         );
 
-        final updatedTask = await TaskService.updateTask(widget.task!.idPatient, updateRequest);
+        final updatedTask = await TaskService.updateTask(widget.task!.id, updateRequest);
         print('Tarea actualizada: ${updatedTask.idPatient}'); // Debug
 
         if (mounted) {
@@ -112,7 +111,7 @@ class _EditMedicationViewState extends State<EditMedicationView> {
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           status: _selectedStatus,
-          startDate: widget.task!.startDate, // ➤ Usa el existente
+          
         );
 
         final createdTask = await TaskService.createTask(createRequest);

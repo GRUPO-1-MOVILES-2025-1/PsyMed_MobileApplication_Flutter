@@ -1,51 +1,107 @@
 class Task {
-  final String idPatient;
+  final String id;
+  final int idPatient;
   final String title;
   final String description;
   final int status;
-  final String startDate;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Task({
+    required this.id,
     required this.idPatient,
     required this.title,
     required this.description,
     required this.status,
-    required this.startDate,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  // Método para convertir el status a texto
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'] ?? '',
+      idPatient: json['idPatient'] ?? 0,
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      status: json['status'] ?? 0,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'idPatient': idPatient,
+      'title': title,
+      'description': description,
+      'status': status,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  // Getters para compatibilidad con el código existente de medicamentos
+  String get name => title;
+  String get dosage => description;
+  String get quantity => 'Status: $status';
+  String get startDate => createdAt.toString().split(' ')[0];
+  String get endDate => updatedAt.toString().split(' ')[0];
+
+  // Método para obtener el estado como texto
   String get statusText {
     switch (status) {
       case 0:
         return 'Pendiente';
       case 1:
-        return 'En progreso';
+        return 'En Progreso';
       case 2:
         return 'Completada';
       default:
         return 'Desconocido';
     }
   }
+}
 
-  // Para parsear desde JSON
-  factory Task.fromJson(Map<String, dynamic> json) {
-    return Task(
-      idPatient: json['id'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      status: json['status'] ?? 0,
-      startDate: json['startDate'] ?? '',
-    );
-  }
+class CreateTaskRequest {
+  final int idPatient;
+  final String title;
+  final String description;
+  final int status;
 
-  // Para enviar como JSON
+  CreateTaskRequest({
+    required this.idPatient,
+    required this.title,
+    required this.description,
+    required this.status,
+  });
+
   Map<String, dynamic> toJson() {
     return {
-      'id': idPatient,
+      'idPatient': idPatient,
       'title': title,
       'description': description,
       'status': status,
-      'startDate': startDate,
+    };
+  }
+}
+
+class UpdateTaskRequest {
+  final String title;
+  final String description;
+  final int status;
+
+  UpdateTaskRequest({
+    required this.title,
+    required this.description,
+    required this.status,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'status': status,
     };
   }
 }
