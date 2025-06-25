@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_moviles/views/register_view.dart';
+import 'package:proyecto_moviles/views/iam/register_view.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
 import 'package:proyecto_moviles/services/auth_service.dart';
 import 'dart:convert';

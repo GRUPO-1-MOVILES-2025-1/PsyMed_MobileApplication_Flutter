@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/pantalla_carga.dart'; // Asegúrate de tener este archivo
+import 'views/iam/pantalla_carga.dart'; // Asegúrate de tener este archivo
 import 'package:google_fonts/google_fonts.dart';
 
 
