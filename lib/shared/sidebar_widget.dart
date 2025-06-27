@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
 import 'package:proyecto_moviles/views/login_view.dart';
 import 'package:proyecto_moviles/views/settings_view.dart';
+import 'package:proyecto_moviles/views/iam/login_view.dart';
 
 class SidebarWidget extends StatelessWidget {
   final String userName;
@@ -21,6 +22,7 @@ class SidebarWidget extends StatelessWidget {
       child: Column(
         children: [
           DrawerHeader(
+            
             decoration: BoxDecoration(color: Color(0xFF10BEAE)),
             child: Center(
               child: Column(
@@ -92,6 +94,7 @@ class SidebarWidget extends StatelessWidget {
             leading: Icon(Icons.logout, color: Colors.red),
             title: Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
             onTap: () {
+              // TODO: Lógica de logout, por ejemplo:
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginView()),
@@ -103,4 +106,3 @@ class SidebarWidget extends StatelessWidget {
     );
   }
 }
-
