@@ -47,7 +47,7 @@ class AuthService {
     };
 
     return http.post(
-      Uri.parse('$baseUrl/api/auth/login'),
+      Uri.parse('$baseUrl/api/Auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(loginData),
     );

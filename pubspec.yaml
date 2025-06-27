@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  jwt_decoder: ^2.0.1
   flutter:
     sdk: flutter
   google_fonts: ^6.1.0
@@ -62,6 +63,7 @@ flutter:
     - assets/images/logo_psymed.png
     - assets/icons/google.png
     - assets/icons/microsoft.png
+    - assets/images/settings_banner.png
 
 
   

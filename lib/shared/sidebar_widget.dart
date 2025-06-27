@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
+import 'package:proyecto_moviles/views/settings_view.dart';
 import 'package:proyecto_moviles/views/iam/login_view.dart';
 
 class SidebarWidget extends StatelessWidget {
   final String userName;
-  SidebarWidget({super.key, required this.userName});
+  final String userId;
+  final String token;
+
+  SidebarWidget({
+    super.key,
+    required this.userName,
+    required this.userId,
+    required this.token,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +55,30 @@ class SidebarWidget extends StatelessWidget {
             onTap: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => HomeView(userName: userName)),
-              ); 
+                MaterialPageRoute(
+                  builder: (context) => HomeView(
+                    userName: userName,
+                    userId: userId,
+                    token: token,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Configuración'),
             onTap: () {
-              // TODO: Navegar a configuración
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsView(
+                    userName: userName,
+                    userId: userId,
+                    token: token,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -64,7 +88,7 @@ class SidebarWidget extends StatelessWidget {
               // TODO: Navegar a ayuda
             },
           ),
-          const Spacer(), // Empuja el botón de cerrar sesión al final
+          const Spacer(),
           ListTile(
             leading: Icon(Icons.logout, color: Colors.red),
             title: Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
