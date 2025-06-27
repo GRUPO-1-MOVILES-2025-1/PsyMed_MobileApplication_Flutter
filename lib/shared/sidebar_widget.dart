@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/views/home_view.dart';
-import 'package:proyecto_moviles/views/login_view.dart';
 import 'package:proyecto_moviles/views/settings_view.dart';
 import 'package:proyecto_moviles/views/iam/login_view.dart';
 

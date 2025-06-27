@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
+import 'package:proyecto_moviles/views/profile_view.dart';
 
 class MoodListView extends StatefulWidget {
   final String userName;
@@ -111,7 +112,18 @@ class _MoodListViewState extends State<MoodListView> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.account_circle, color: Colors.white),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileView(
+                            userName: widget.userName,
+                            userId: widget.userId,
+                            token: widget.token,
+                          ),
+                        ),
+                      );
+                    },
                     tooltip: 'Perfil',
                   ),
                 ],

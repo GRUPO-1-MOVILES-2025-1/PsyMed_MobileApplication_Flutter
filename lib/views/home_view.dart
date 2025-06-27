@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_moviles/views/patients_list_view.dart';
 import 'package:proyecto_moviles/views/profile_view.dart';
 import 'package:proyecto_moviles/views/settings_view.dart';
 

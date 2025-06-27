@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
+import 'package:proyecto_moviles/views/profile_view.dart';
 
 class SettingsView extends StatefulWidget {
   final String userName;
@@ -245,7 +246,18 @@ class _SettingsViewState extends State<SettingsView> {
           ),
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileView(
+                    userName: widget.userName,
+                    userId: widget.userId,
+                    token: widget.token,
+                  ),
+                ),
+              );
+            },
             tooltip: 'Perfil',
           ),
         ],

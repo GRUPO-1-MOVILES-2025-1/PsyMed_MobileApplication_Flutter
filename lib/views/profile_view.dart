@@ -165,7 +165,18 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileView(
+                    userName: widget.userName,
+                    userId: widget.userId,
+                    token: widget.token,
+                  ),
+                ),
+              );
+            },
             tooltip: 'Perfil',
           ),
         ],
