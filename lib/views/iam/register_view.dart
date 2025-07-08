@@ -69,21 +69,13 @@ class _RegisterViewState extends State<RegisterView> {
 
       setState(() => _loading = false);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final success = data['success'];
-        final error = data['error'];
-
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Cuenta registrada con éxito")),
-          );
+      if (response.statusCode == 201) {
+        //final data = jsonDecode(response.body);
+        //final success = data['success'];
+        //final error = data['error'];
+         // Redirige al login
           Navigator.pop(context);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error: $error")),
-          );
-        }
+        
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error de red: ${response.statusCode}")),

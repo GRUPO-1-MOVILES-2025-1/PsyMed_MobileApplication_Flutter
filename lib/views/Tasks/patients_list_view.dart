@@ -1,80 +1,143 @@
 import 'package:flutter/material.dart';
-import 'patient_detail_view.dart';
+import 'package:proyecto_moviles/models/patient.dart';
+import 'package:proyecto_moviles/services/PatientService.dart';
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
+import 'patient_detail_view.dart';
 
-class PatientsListView extends StatelessWidget {
+class PatientsListView extends StatefulWidget {
   final String userName;
   final String userId;
   final String token;
 
-  PatientsListView({
+  const PatientsListView({
     super.key,
     required this.userName,
     required this.userId,
     required this.token,
   });
-  
+
+  @override
+  State<PatientsListView> createState() => _PatientsListViewState();
+}
+
+class _PatientsListViewState extends State<PatientsListView> {
+  List<Patient> _patients = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPatients();
+  }
+
+  void _fetchPatients() async {
+    try {
+      final patients = await PatientService.fetchPatients(token: widget.token);
+      setState(() {
+        _patients = patients;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  void _mostrarDialogoAgregarPaciente(BuildContext context) {
+  final _nameController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Agregar Paciente"),
+        content: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: "Nombre"),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Requerido' : null,
+                ),
+                TextFormField(
+                  controller: _ageController,
+                  decoration: InputDecoration(labelText: "Edad"),
+                  keyboardType: TextInputType.number,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Requerido' : null,
+                ),
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: InputDecoration(labelText: "Teléfono"),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Requerido' : null,
+                ),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: "Email"),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Requerido' : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                try {
+                  final newPatient = Patient(
+                    name: _nameController.text.trim(),
+                    age: int.parse(_ageController.text.trim()),
+                    phone: _phoneController.text.trim(),
+                    email: _emailController.text.trim(),
+                  );
+                  await PatientService.createPatient(
+                      patient: newPatient, token: widget.token);
+                  Navigator.pop(context);
+                  _fetchPatients();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Paciente agregado con éxito')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            child: Text("Guardar"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
-    final patients = [
-      {
-        'name': 'Jhon Doe',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👨‍💼',
-      },
-      {
-        'name': 'Maria Becerra',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👩‍💼',
-      },
-      {
-        'name': 'Juan del Piero',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👨‍🦱',
-      },
-      {
-        'name': 'Jhon Doe',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👨‍💼',
-      },
-      {
-        'name': 'Maria Becerra',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👩‍💼',
-      },
-      {
-        'name': 'Juan del Piero',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👨‍🦱',
-      },
-      {
-        'name': 'Joshua Kimmich',
-        'age': '32 años',
-        'phone': '984 123 451',
-        'email': 'correo@hotmail.com',
-        'avatar': '👨‍🦲',
-      },
-    ];
-
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: SidebarWidget(
-        userName: userName,
-        userId: userId,
-        token: token,
+        userName: widget.userName,
+        userId: widget.userId,
+        token: widget.token,
       ),
       appBar: AppBar(
         backgroundColor: const Color(0xFF10BEAE),
@@ -83,15 +146,14 @@ class PatientsListView extends StatelessWidget {
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () {
-              Scaffold.of(context).openDrawer(); // ✅ Ahora sí funciona
+              Scaffold.of(context).openDrawer();
             },
             tooltip: 'Menú',
           ),
         ),
-
         title: Text(
-          'Welcome $userName',
-          style: TextStyle(
+          'Welcome ${widget.userName}',
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -106,80 +168,92 @@ class PatientsListView extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Contenido principal
           Column(
             children: [
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 64, 16, 16),
-                  itemCount: patients.length,
-                  itemBuilder: (context, index) {
-                    final patient = patients[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: CircleAvatar(
-                          radius: 25,
-                          backgroundColor: Colors.grey[200],
-                          child: Text(
-                            patient['avatar']!,
-                            style: const TextStyle(fontSize: 20),
+              if (_loading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_error != null)
+                Expanded(
+                  child: Center(child: Text('Error: $_error')),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 64, 16, 16),
+                    itemCount: _patients.length,
+                    itemBuilder: (context, index) {
+                      final patient = _patients[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(12),
+                          leading: CircleAvatar(
+                            radius: 25,
+                            backgroundColor: Colors.grey[200],
+                            child: Text(
+                              patient.name[0],
+                              style: const TextStyle(fontSize: 20),
+                            ),
                           ),
-                        ),
-                        title: Text(
-                          patient['name']!,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                          title: Text(
+                            patient.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            Text(
-                              patient['age']!,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                '${patient.age} años',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '${patient['phone']} | ${patient['email']}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                              Text(
+                                '${patient.phone} | ${patient.email}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.grey),
-                          onPressed: () {},
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PatientDetailView(
-                                patientName: patient['name']!,
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.grey),
+                            onPressed: () {
+                              // TODO: Implementar edición
+                            },
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PatientDetailView(
+                                  patientName: patient.name,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _mostrarDialogoAgregarPaciente(context);
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF10BEAE),
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -200,7 +274,7 @@ class PatientsListView extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: _fetchPatients,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF10BEAE),
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -209,7 +283,7 @@ class PatientsListView extends StatelessWidget {
                           ),
                         ),
                         child: const Text(
-                          'Watch Patients',
+                          'Reload',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -223,8 +297,6 @@ class PatientsListView extends StatelessWidget {
               ),
             ],
           ),
-
-          // Botón de retroceso flotante
           Positioned(
             top: 12,
             left: 12,
@@ -239,7 +311,6 @@ class PatientsListView extends StatelessWidget {
           ),
         ],
       ),
-
     );
   }
 }

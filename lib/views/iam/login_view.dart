@@ -27,7 +27,7 @@ class _LoginViewState extends State<LoginView> {
     _passwordController.dispose();
     super.dispose();
   }
-
+  
   void _iniciarSesion() async {
   if (_formKey.currentState!.validate()) {
     setState(() => _loading = true);
@@ -41,36 +41,35 @@ class _LoginViewState extends State<LoginView> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final username = data['username'] ?? 'Usuario/a'; // Obtén el nombre de usuario
-      final success = data['success'];
-      final error = data['error'];
+      final id = data['id'];
+      final name = data['name'];
+      final lastname = data['lastName'];
 
-      if (success == true) {
-        final token = data['token'];
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        String userId = decodedToken["nameid"] ?? "";
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Sesión iniciada")),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeView(
-              userName: username,
-              token: token,
-              userId: userId,
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $error")),
-        );
-      }
-    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error de red: ${response.statusCode}")),
+        SnackBar(content: Text("Bienvenido, $name")),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeView(
+            userName: "$name $lastname",
+            token: '',        // No tienes token por ahora
+            userId: id.toString(),
+          ),
+        ),
+      );
+    } else {
+      String errorMsg = "Error de red: ${response.statusCode}";
+      try {
+        final data = jsonDecode(response.body);
+        if (data is Map && data.containsKey('error')) {
+          errorMsg = "Error: ${data['error']}";
+        }
+      } catch (_) {}
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMsg)),
       );
     }
   }

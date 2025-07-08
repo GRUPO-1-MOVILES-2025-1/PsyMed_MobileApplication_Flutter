@@ -18,27 +18,29 @@ class SidebarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            
-            decoration: BoxDecoration(color: Color(0xFF10BEAE)),
-            child: Center(
+            decoration: const BoxDecoration(color: Color(0xFF10BEAE)),
+            child: SingleChildScrollView( // ✅ Evita el overflow
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.account_circle, size: 64, color: Colors.white),
-                  SizedBox(height: 8),
+                  const Icon(Icons.account_circle, size: 64, color: Colors.white),
+                  const SizedBox(height: 8),
                   Text(
                     'Hola, $userName',
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'Menú Principal',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -49,9 +51,10 @@ class SidebarWidget extends StatelessWidget {
               ),
             ),
           ),
+
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Inicio'),
+            leading: const Icon(Icons.home),
+            title: const Text('Inicio'),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -66,8 +69,8 @@ class SidebarWidget extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Configuración'),
+            leading: const Icon(Icons.settings),
+            title: const Text('Configuración'),
             onTap: () {
               Navigator.push(
                 context,
@@ -82,18 +85,17 @@ class SidebarWidget extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.help),
-            title: Text('Ayuda'),
+            leading: const Icon(Icons.help),
+            title: const Text('Ayuda'),
             onTap: () {
               // TODO: Navegar a ayuda
             },
           ),
-          const Spacer(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.logout, color: Colors.red),
-            title: Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
             onTap: () {
-              // TODO: Lógica de logout, por ejemplo:
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginView()),

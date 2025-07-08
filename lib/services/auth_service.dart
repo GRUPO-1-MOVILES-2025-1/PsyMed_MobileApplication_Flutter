@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class AuthService {
   // 🔧 Cambia esta IP si corres en emulador físico o dispositivo real
-  static const String baseUrl = 'http://localhost:5236'; // o tu IP local
+  static const String baseUrl = 'http://192.168.31.252:5236'; // o tu IP local
 
   /// Registro de usuario
   static Future<http.Response> register({
@@ -47,7 +47,7 @@ class AuthService {
     };
 
     return http.post(
-      Uri.parse('$baseUrl/api/Auth/login'),
+      Uri.parse('$baseUrl/api/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(loginData),
     );

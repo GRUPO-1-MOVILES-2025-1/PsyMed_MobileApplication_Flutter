@@ -5,6 +5,8 @@ import 'package:proyecto_moviles/views/settings_view.dart';
 import 'package:proyecto_moviles/views/Tasks/patients_list_view.dart';
 import 'package:proyecto_moviles/views/Calendar/calendar_view.dart';
 import 'package:proyecto_moviles/shared/sidebar_widget.dart';
+import 'package:proyecto_moviles/views/agenda/agenda_view.dart';
+
 
 class HomeView extends StatelessWidget {
   final String userName;
@@ -148,7 +150,13 @@ class HomeView extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => CalendarView(userName: this.userName)),
+                          MaterialPageRoute(
+                            builder: (context) => AgendaView(
+                              userName: userName,
+                              userId: userId,
+                              token: token,
+                            ),
+                          ),
                         );
                       },
                     ),
